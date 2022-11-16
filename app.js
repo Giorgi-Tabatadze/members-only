@@ -4,6 +4,12 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 
+const mongoose = require("mongoose");
+const session = require("express-session");
+const passport = require("passport");
+
+const MongoStore = require("connect-mongo")(session);
+
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 
@@ -19,6 +25,30 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+//-------------- SESSION SETUP --------------
+
+const sessionStore = new MongoStore({
+  mongooseConnection: connection,
+  collection: "sessions",
+});
+app.use(
+  session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStore,
+    cookie: {
+      maxAge: 1000 * 200,
+    },
+  }),
+);
+
+//-------------- PASSPORT SETUP --------------
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// -------------- ROUTES ----------------
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 
