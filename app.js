@@ -3,15 +3,16 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+require("dotenv").config();
 
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 
-const MongoStore = require("connect-mongo")(session);
+const MongoStore = require("connect-mongo");
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+const clubRouter = require("./routes/club");
 
 var app = express();
 
@@ -28,8 +29,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //-------------- SESSION SETUP --------------
 
 const sessionStore = new MongoStore({
-  mongooseConnection: connection,
-  collection: "sessions",
+  mongoUrl: process.env.MONGODB_URI,
 });
 app.use(
   session({
@@ -50,8 +50,7 @@ app.use(passport.session());
 
 // -------------- ROUTES ----------------
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
-
+app.use("/club", clubRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
