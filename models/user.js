@@ -5,11 +5,11 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
-  salt: { type: String },
-  dateReg: { type: Date, default: date.now() },
+  salt: { type: String, required: true },
+  dateReg: { type: Date, default: Date.now() },
   firstname: { type: String, required: true },
   lastname: { type: String, required: true },
-  avatar: { type: String, required: true },
+  avatar: { type: String, default: "defaultavatar.png" },
   member: { type: Boolean, default: false },
   admin: { type: Boolean, default: false },
 });

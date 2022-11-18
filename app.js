@@ -8,6 +8,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+const db = require("./config/database");
 
 const MongoStore = require("connect-mongo");
 
@@ -51,6 +52,7 @@ app.use(passport.session());
 // -------------- ROUTES ----------------
 app.use("/", indexRouter);
 app.use("/club", clubRouter);
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
