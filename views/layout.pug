@@ -12,11 +12,25 @@ html(lang='en')
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js', integrity='sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk', crossorigin='anonymous')
     nav.container 
       ul.nav.justify-content-end
-        li.nav-item
-          a.nav-link( href='/club') Home
-        li.nav-item
-          a.nav-link(href='/club/sign-up') Sign Up
-        li.nav-item
-          a.nav-link(href='/club/login') Sign In
+        if activeUser
+          li.nav-item 
+            span.nav-link Welcome #{activeUser.username}
+          li.nav-item
+            a.nav-link( href='/club') Home
+          if (activeUser.member === false)
+            li.nav-item
+              a.nav-link( href='/become-member') Become member 
+          if (activeUser.member === true && activeUser.admin === false)
+            li.nav-item
+              a.nav-link( href='/become-admin') Become Admin        
+
+        else 
+          li.nav-item
+            a.nav-link( href='/club') Home
+          li.nav-item
+            a.nav-link(href='/club/sign-up') Sign Up
+          li.nav-item
+            a.nav-link(href='/club/login') Sign In
+
     main.container
       block content

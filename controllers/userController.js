@@ -136,7 +136,6 @@ exports.user_loginFailure_get = function (req, res, next) {
 };
 
 exports.user_loginSuccess_get = function (req, res, next) {
-  console.log(req.session.passport);
   res.redirect("/club");
 };
 
