@@ -6,6 +6,10 @@ const passport = require("passport");
 /// SIGN UP ///
 
 exports.user_signUp_get = function (req, res, next) {
+  if (req.session?.passport?.user !== undefined) {
+    res.redirect("/club");
+    return;
+  }
   res.render("sign_up");
 };
 exports.user_signUp_post = [
@@ -30,6 +34,10 @@ exports.user_signUp_post = [
       }
     }),
   function (req, res, next) {
+    if (req.session?.passport?.user !== undefined) {
+      res.redirect("/club");
+      return;
+    }
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -80,6 +88,7 @@ exports.user_signUp_post = [
 exports.user_login_get = function (req, res, next) {
   if (req.session?.passport?.user !== undefined) {
     res.redirect("/club");
+    return;
   }
   console.log(req.failureMessage);
   res.render("login");
@@ -92,6 +101,10 @@ exports.user_login_post = [
     .escape(),
 
   function (req, res, next) {
+    if (req.session?.passport?.user !== undefined) {
+      res.redirect("/club");
+      return;
+    }
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -99,6 +112,7 @@ exports.user_login_post = [
         username: req.body.username,
         errors: errors.array(),
       });
+      return;
     }
     next();
   },
@@ -111,9 +125,9 @@ exports.user_login_post = [
 ];
 
 exports.user_loginFailure_get = function (req, res, next) {
-  console.log(req.body);
   if (req.session?.passport?.user !== undefined) {
     res.redirect("/club");
+    return;
   }
   res.render("login", {
     username: req.body.username,
@@ -122,6 +136,7 @@ exports.user_loginFailure_get = function (req, res, next) {
 };
 
 exports.user_loginSuccess_get = function (req, res, next) {
+  console.log(req.session.passport);
   res.redirect("/club");
 };
 
