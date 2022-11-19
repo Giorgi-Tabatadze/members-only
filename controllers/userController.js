@@ -1,6 +1,9 @@
 const User = require("../models/user");
 const { body, validationResult } = require("express-validator");
 const passwordUtils = require("../lib/passportUtils");
+const passport = require("passport");
+
+/// SIGN UP ///
 
 exports.user_signUp_get = function (req, res, next) {
   res.render("sign_up");
@@ -36,41 +39,99 @@ exports.user_signUp_post = [
         lastname: req.body.lastname,
         errors: errors.array(),
       });
-    } else {
-      const saltHash = passwordUtils.genPassword(req.body.password);
-
-      const salt = saltHash.salt;
-      const password = saltHash.hash;
-
-      const user = new User({
-        username: req.body.username,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        password: password,
-        salt: salt,
-      });
-
-      user.save((err) => {
-        if (err) {
-          return next(err);
-        }
-        res.redirect("/login");
-      });
     }
+    User.exists({ username: req.body.username }, function (err, user) {
+      if (err) {
+        return next(err);
+      }
+      if (user) {
+        res.render("sign_up", {
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          errors: [{ msg: "Username is already in use" }],
+        });
+      } else {
+        const saltHash = passwordUtils.genPassword(req.body.password);
+
+        const salt = saltHash.salt;
+        const password = saltHash.hash;
+
+        const user = new User({
+          username: req.body.username,
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          password: password,
+          salt: salt,
+        });
+
+        user.save((err) => {
+          if (err) {
+            return next(err);
+          }
+          res.redirect("/club/login");
+        });
+      }
+    });
   },
 ];
+
+/// LOGIN /////
+
 exports.user_login_get = function (req, res, next) {
-  res.send("not implemented yet");
+  if (req.session?.passport?.user !== undefined) {
+    res.redirect("/club");
+  }
+  console.log(req.failureMessage);
+  res.render("login");
 };
-exports.user_login_post = function (req, res, next) {
-  res.send("not implemented yet");
+exports.user_login_post = [
+  body("username", "Username Required").trim().isLength({ min: 1 }).escape(),
+  body("password", "Password must be at least 6 characters")
+    .trim()
+    .isLength({ min: 6 })
+    .escape(),
+
+  function (req, res, next) {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.render("login", {
+        username: req.body.username,
+        errors: errors.array(),
+      });
+    }
+    next();
+  },
+
+  passport.authenticate("local", {
+    failureFlash: true,
+    failureRedirect: "/club/login-failure",
+    successRedirect: "/club/login-success",
+  }),
+];
+
+exports.user_loginFailure_get = function (req, res, next) {
+  console.log(req.body);
+  if (req.session?.passport?.user !== undefined) {
+    res.redirect("/club");
+  }
+  res.render("login", {
+    username: req.body.username,
+    loginError: req.flash("error"),
+  });
 };
+
+exports.user_loginSuccess_get = function (req, res, next) {
+  res.redirect("/club");
+};
+
 exports.user_becomeMember_get = function (req, res, next) {
   res.send("not implemented yet");
 };
 exports.user_becomeMember_post = function (req, res, next) {
   res.send("not implemented yet");
 };
+
 exports.user_becomeAdmin_get = function (req, res, next) {
   res.send("not implemented yet");
 };

@@ -3,11 +3,14 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-require("dotenv").config();
 
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+var flash = require("connect-flash");
+require("./config/passport");
+require("dotenv").config();
+
 const db = require("./config/database");
 
 const MongoStore = require("connect-mongo");
@@ -39,7 +42,7 @@ app.use(
     saveUninitialized: true,
     store: sessionStore,
     cookie: {
-      maxAge: 1000 * 200,
+      maxAge: 1000 * 30,
     },
   }),
 );
@@ -48,6 +51,7 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 
 // -------------- ROUTES ----------------
 app.use("/", indexRouter);
