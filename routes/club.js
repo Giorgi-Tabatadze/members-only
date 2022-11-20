@@ -16,5 +16,9 @@ router.get("/login", user_controller.user_login_get);
 router.post("/login", user_controller.user_login_post);
 router.get("/login-failure", user_controller.user_loginFailure_get);
 router.get("/login-success", user_controller.user_loginSuccess_get);
+router.get("/become-member", user_controller.user_becomeMember_get);
+router.post("/become-member", user_controller.user_becomeMember_post);
+router.get("/become-admin", user_controller.user_becomeAdmin_get);
+router.post("/become-admin", user_controller.user_becomeAdmin_post);
 
 module.exports = router;

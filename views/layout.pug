@@ -19,10 +19,10 @@ html(lang='en')
             a.nav-link( href='/club') Home
           if (activeUser.member === false)
             li.nav-item
-              a.nav-link( href='/become-member') Become member 
+              a.nav-link( href='/club/become-member') Become member 
           if (activeUser.member === true && activeUser.admin === false)
             li.nav-item
-              a.nav-link( href='/become-admin') Become Admin        
+              a.nav-link( href='/club/become-admin') Become Admin        
 
         else 
           li.nav-item

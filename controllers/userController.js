@@ -140,11 +140,65 @@ exports.user_loginSuccess_get = function (req, res, next) {
 };
 
 exports.user_becomeMember_get = function (req, res, next) {
-  res.send("not implemented yet");
+  if (!req.session?.passport?.user) {
+    res.redirect("/club/login");
+    return;
+  } else if (res.locals.activeUser.member || res.locals.activeUser.admin) {
+    res.redirect("/club");
+  } else {
+    res.render("become_member");
+  }
 };
-exports.user_becomeMember_post = function (req, res, next) {
-  res.send("not implemented yet");
-};
+
+exports.user_becomeMember_post = [
+  body("memberQuestion")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Answer is required")
+    .escape()
+    .custom((value, { req, loc, path }) => {
+      if (value === "a" || value === "b" || value === "c" || value === "d") {
+        return value;
+      } else {
+        throw new Error("Answers Should not be modified");
+      }
+    }),
+
+  function (req, res, next) {
+    if (!req.session?.passport?.user) {
+      res.redirect("/club/login");
+      return;
+    } else if (res.locals.activeUser.member || res.locals.activeUser.admin) {
+      res.redirect("/club");
+    } else {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        res.render("become_member", {
+          errors: errors.array(),
+        });
+        return;
+      } else {
+        const answeredCorrectly = req.body.memberQuestion === "d";
+        if (!answeredCorrectly) {
+          res.render("become_member", {
+            inCorrect: true,
+          });
+        } else {
+          User.findById(req.session.passport.user).exec((err, user) => {
+            if (err) {
+              return next(err);
+            }
+            user.member = true;
+            user.save((err) => {
+              res.redirect("/club");
+            });
+          });
+        }
+      }
+    }
+  },
+];
 
 exports.user_becomeAdmin_get = function (req, res, next) {
   res.send("not implemented yet");
