@@ -1,0 +1,17 @@
+extends layout
+
+block content
+    form(method='POST' action='')
+        .mb-3
+            label.form-label(for='title') Title:
+            input#title.form-control(type='text',  name="title" required value=(title === undefined ? "" : title))
+        .mb-3
+            label(for="body") Message: 
+            textarea#body.form-control(name="body", cols="30", rows="10" required) #{body === undefined ? "" : body}
+
+        button.btn.btn-primary(type='submit') Submit
+
+    if errors 
+        ul
+            for error in errors 
+                li!= error.msg

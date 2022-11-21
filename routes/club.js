@@ -7,9 +7,12 @@ const userUtils = require("../lib/userUtils");
 
 router.use(userUtils.userDataToLocals);
 
-//  USER ROUTES
+/// Message Routes
 
 router.get("/", message_controller.message_board_get);
+router.get("/create-message", message_controller.message_create_get);
+//  USER ROUTES
+
 router.get("/sign-up", user_controller.user_signUp_get);
 router.post("/sign-up", user_controller.user_signUp_post);
 router.get("/login", user_controller.user_login_get);

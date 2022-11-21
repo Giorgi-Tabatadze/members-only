@@ -17,6 +17,8 @@ html(lang='en')
             span.nav-link Welcome #{activeUser.username}
           li.nav-item
             a.nav-link( href='/club') Home
+          li.nav-item 
+            a.nav-link( href='/club/create-message') Create Message
           if (activeUser.member === false)
             li.nav-item
               a.nav-link( href='/club/become-member') Become member 
