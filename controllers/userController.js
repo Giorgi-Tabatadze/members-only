@@ -143,7 +143,7 @@ exports.user_becomeMember_get = function (req, res, next) {
   if (!req.session?.passport?.user) {
     res.redirect("/club/login");
     return;
-  } else if (res.locals.activeUser.member || res.locals.activeUser.admin) {
+  } else if (res.locals.activeUser.member) {
     res.redirect("/club");
   } else {
     res.render("become_member");
@@ -168,7 +168,7 @@ exports.user_becomeMember_post = [
     if (!req.session?.passport?.user) {
       res.redirect("/club/login");
       return;
-    } else if (res.locals.activeUser.member || res.locals.activeUser.admin) {
+    } else if (res.locals.activeUser.member) {
       res.redirect("/club");
     } else {
       const errors = validationResult(req);
@@ -191,6 +191,9 @@ exports.user_becomeMember_post = [
             }
             user.member = true;
             user.save((err) => {
+              if (err) {
+                return next(err);
+              }
               res.redirect("/club");
             });
           });
@@ -201,8 +204,155 @@ exports.user_becomeMember_post = [
 ];
 
 exports.user_becomeAdmin_get = function (req, res, next) {
-  res.send("not implemented yet");
+  if (!req.session?.passport?.user) {
+    res.redirect("/club/login");
+    return;
+  } else if (!res.locals.activeUser.member) {
+    res.redirect("/club/become-member");
+  } else if (res.locals.activeUser.admin) {
+    res.redirect("/club");
+  } else {
+    res.render("become_admin");
+  }
 };
-exports.user_becomeAdmin_post = function (req, res, next) {
-  res.send("not implemented yet");
-};
+
+exports.user_becomeAdmin_post = [
+  //// VALIDATION
+  body("firstAnswer")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Answer is required")
+    .escape()
+    .custom((value, { req, loc, path }) => {
+      if (value === "1" || value === "2" || value === "3" || value === "4") {
+        return value;
+      } else {
+        throw new Error("Answers should be numbers between 1 and 4");
+      }
+    })
+    .custom((value, { req, loc, path }) => {
+      if (
+        value === req.body.secondAnswer ||
+        value === req.body.thirdAnswer ||
+        value === req.body.fourthAnswer
+      ) {
+        throw new Error("Answer order can not contain same numbers");
+      } else {
+        return value;
+      }
+    }),
+  body("secondAnswer")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Answer is required")
+    .escape()
+    .custom((value, { req, loc, path }) => {
+      if (value === "1" || value === "2" || value === "3" || value === "4") {
+        return value;
+      } else {
+        throw new Error("Answers should be numbers between 1 and 4");
+      }
+    })
+    .custom((value, { req, loc, path }) => {
+      if (
+        value === req.body.firstAnswer ||
+        value === req.body.thirdAnswer ||
+        value === req.body.fourthAnswer
+      ) {
+        throw new Error("Answer order can not contain same numbers");
+      } else {
+        return value;
+      }
+    }),
+  body("thirdAnswer")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Answer is required")
+    .escape()
+    .custom((value, { req, loc, path }) => {
+      if (value === "1" || value === "2" || value === "3" || value === "4") {
+        return value;
+      } else {
+        throw new Error("Answers should be numbers between 1 and 4");
+      }
+    })
+    .custom((value, { req, loc, path }) => {
+      if (
+        value === req.body.secondAnswer ||
+        value === req.body.firstAnswer ||
+        value === req.body.fourthAnswer
+      ) {
+        throw new Error("Answer order can not contain same numbers");
+      } else {
+        return value;
+      }
+    }),
+  body("fourthAnswer")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Answer is required")
+    .escape()
+    .custom((value, { req, loc, path }) => {
+      if (value === "1" || value === "2" || value === "3" || value === "4") {
+        return value;
+      } else {
+        throw new Error("Answers should be numbers between 1 and 4");
+      }
+    })
+    .custom((value, { req, loc, path }) => {
+      if (
+        value === req.body.secondAnswer ||
+        value === req.body.firstAnswer ||
+        value === req.body.thirdAnswer
+      ) {
+        throw new Error("Answer order can not contain same numbers");
+      } else {
+        return value;
+      }
+    }),
+
+  /// MAIN PROCEDURE
+  function (req, res, next) {
+    if (!req.session?.passport?.user) {
+      res.redirect("/club/login");
+      return;
+    } else if (!res.locals.activeUser.member) {
+      res.redirect("/club/become-member");
+    } else if (res.locals.activeUser.admin) {
+      res.redirect("/club");
+    } else {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        res.render("become_admin", {
+          errors: errors.array(),
+        });
+        return;
+      } else {
+        const answeredCorrectly =
+          req.body.firstAnswer === "1" &&
+          req.body.secondAnswer === "4" &&
+          req.body.thirdAnswer === "3" &&
+          req.body.fourthAnswer === "2";
+        if (!answeredCorrectly) {
+          res.render("become_admin", {
+            inCorrect: true,
+          });
+        } else {
+          User.findById(req.session.passport.user).exec((err, user) => {
+            if (err) {
+              return next(err);
+            }
+            user.admin = true;
+            user.save((err) => {
+              if (err) {
+                return next(err);
+              }
+              res.redirect("/club");
+            });
+          });
+        }
+      }
+    }
+  },
+];

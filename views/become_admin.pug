@@ -1,0 +1,29 @@
+extends layout
+
+block content
+    h3 In what order will the numbers 1-4 be logged to the console when the code below is executed?
+    img(src="/images/adminQuestion.png", alt="coding question")
+
+     
+    form.form-check(method='POST' action='/club/become-admin')
+        .mb-3
+            label.form-label(for='first') N1: 
+                input#first.form-control.admin-numbers(type='number',  name="firstAnswer" required min="1" max="4" maxlength="1")
+            label.form-label(for='second') N2: 
+                input#second.form-control.admin-numbers(type='number',  name="secondAnswer" required min="1" max="4" maxlength="1")
+            label.form-label(for='third') N3:
+                input#third.form-control.admin-numbers(type='number',  name="thirdAnswer" required min="1" max="4" maxlength="1")
+            label.form-label(for='fourth') N4:
+                input#fourth.form-control.admin-numbers(type='number',  name="fourthAnswer" required min="1" max="4" maxlength="1")
+
+        button.btn.btn-primary(type='submit') Submit
+
+    if errors 
+        ul
+            for error in errors 
+                li!= error.msg 
+    if (inCorrect)
+        ul
+            li That is not a correct answer, please try again!
+        
+    script(src="/javascripts/nextInput.js")
