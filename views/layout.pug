@@ -23,7 +23,8 @@ html(lang='en')
           if (activeUser.member === true && activeUser.admin === false)
             li.nav-item
               a.nav-link( href='/club/become-admin') Become Admin        
-
+          li.nav-item 
+              a.nav-link( href='/club/logout') Log Out
         else 
           li.nav-item
             a.nav-link( href='/club') Home

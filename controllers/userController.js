@@ -124,8 +124,17 @@ exports.user_login_post = [
   }),
 ];
 
+exports.user_logout_get = function (req, res, next) {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/club");
+  });
+};
+
 exports.user_loginFailure_get = function (req, res, next) {
-  if (req.session?.passport?.user !== undefined) {
+  if (req.isAuthenticated()) {
     res.redirect("/club");
     return;
   }
@@ -140,7 +149,7 @@ exports.user_loginSuccess_get = function (req, res, next) {
 };
 
 exports.user_becomeMember_get = function (req, res, next) {
-  if (!req.session?.passport?.user) {
+  if (!req.isAuthenticated()) {
     res.redirect("/club/login");
     return;
   } else if (res.locals.activeUser.member) {
@@ -165,7 +174,7 @@ exports.user_becomeMember_post = [
     }),
 
   function (req, res, next) {
-    if (!req.session?.passport?.user) {
+    if (!req.isAuthenticated()) {
       res.redirect("/club/login");
       return;
     } else if (res.locals.activeUser.member) {
@@ -204,7 +213,7 @@ exports.user_becomeMember_post = [
 ];
 
 exports.user_becomeAdmin_get = function (req, res, next) {
-  if (!req.session?.passport?.user) {
+  if (!req.isAuthenticated()) {
     res.redirect("/club/login");
     return;
   } else if (!res.locals.activeUser.member) {
@@ -313,7 +322,7 @@ exports.user_becomeAdmin_post = [
 
   /// MAIN PROCEDURE
   function (req, res, next) {
-    if (!req.session?.passport?.user) {
+    if (!req.isAuthenticated()) {
       res.redirect("/club/login");
       return;
     } else if (!res.locals.activeUser.member) {

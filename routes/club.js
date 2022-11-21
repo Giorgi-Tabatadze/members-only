@@ -14,6 +14,7 @@ router.get("/sign-up", user_controller.user_signUp_get);
 router.post("/sign-up", user_controller.user_signUp_post);
 router.get("/login", user_controller.user_login_get);
 router.post("/login", user_controller.user_login_post);
+router.get("/logout", user_controller.user_logout_get);
 router.get("/login-failure", user_controller.user_loginFailure_get);
 router.get("/login-success", user_controller.user_loginSuccess_get);
 router.get("/become-member", user_controller.user_becomeMember_get);
