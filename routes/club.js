@@ -11,6 +11,8 @@ router.use(userUtils.userDataToLocals);
 
 router.get("/", message_controller.message_board_get);
 router.get("/create-message", message_controller.message_create_get);
+router.post("/create-message", message_controller.message_create_post);
+
 //  USER ROUTES
 
 router.get("/sign-up", user_controller.user_signUp_get);

@@ -7,7 +7,7 @@ const MessageSchema = new Schema({
   body: { type: String, required: true, maxLength: 300 },
   date: { type: Date, default: Date.now() },
   pinnedDate: { type: Date, default: 0 },
-  user: { type: Schema.Types.ObjectId, ref: "user", required: true },
+  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 
 module.exports = mongoose.model("Mesage", MessageSchema);

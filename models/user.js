@@ -14,4 +14,8 @@ const UserSchema = new Schema({
   admin: { type: Boolean, default: false },
 });
 
+UserSchema.virtual("photoUrl").get(function () {
+  return `/images/${this.avatar}`;
+});
+
 module.exports = mongoose.model("User", UserSchema);
