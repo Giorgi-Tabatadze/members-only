@@ -3,18 +3,21 @@ extends layout
 block content
   h1= "Welcome to message board"
   if (!message_list) 
-  p Error fetching message
+    p Error fetching message
   if (message_list)
     each message in message_list 
       .media
-        if message.user 
-          img.align-self-center.mr-3(src=(message.user.photoUrl) alt='user avatar')
-          h5.mt-0  #{message.user.firstname} #{message.user.lastname}
-        else 
-          img.align-self-center.mr-3(src="" alt='user avatar')
+        img.align-self-center.mr-3(src=(message.user.avatar ? message.user.photoUrl : "/images/defaultavatar.png") alt='user avatar')
+        h5.mt-0  #{message.user.firstname !== undefined ? `${message.user.firstname} ${message.user.lastname}` : activeUser  ? message.userAuthorCompare === 0 ? `${activeUser.firstname} ${activeUser.lastname}` : "Become a member to view author info" : "Log in to view author info"}
         .media-body
           h5.mt-0 #{message.title}
           p #{message.body}
+          p Date Published: #{message.date ? `${message.dateFormatted}` : "Become member to view"}
+        if (message.userAuthorCompare === 0 && activeUser.member)
+          a(href=`/club/${message._id}/edit/${message._id}`) Edit This message
+        if(activeUser && activeUser.admin)
+            a(href=`/club/${message._id}/delete`) Delete This message
+
 
 
 

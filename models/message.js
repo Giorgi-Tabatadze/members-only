@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { DateTime } = require("luxon");
 
 const Schema = mongoose.Schema;
 
@@ -8,6 +9,11 @@ const MessageSchema = new Schema({
   date: { type: Date, default: Date.now() },
   pinnedDate: { type: Date, default: 0 },
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  userAuthorCompare: { type: Number },
 });
 
-module.exports = mongoose.model("Mesage", MessageSchema);
+MessageSchema.virtual("dateFormatted").get(function () {
+  return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
+});
+
+module.exports = mongoose.model("Message", MessageSchema);

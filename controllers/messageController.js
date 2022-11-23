@@ -1,18 +1,73 @@
 const Message = require("../models/message");
+const User = require("../models/user");
+const async = require("async");
+
 const { body, validationResult } = require("express-validator");
 
 exports.message_board_get = function (req, res, next) {
-  const dataToGet = !req.isAuthenticated() ? "" : "title body date pinnedDate";
-  const populate = !req.isAuthenticated() ? "" : "user";
-  Message.find({}, dataToGet)
-    .populate(populate, "firstname lastname avatar")
-    .exec((err, message_list) => {
-      if (err) {
-        return next(err);
-      }
-      res.render("index", { message_list });
+  const loggedUserId = req.isAuthenticated() ? req.session.passport.user : "";
+  const aggregationPipeline = res.locals?.activeUser?.member
+    ? [
+        {
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "user",
+            pipeline: [{ $unset: ["password", "salt"] }],
+          },
+        },
+        {
+          $sort: {
+            date: -1,
+          },
+        },
+        { $unwind: "$user" },
+        {
+          $addFields: {
+            userAuthorCompare: {
+              $strcasecmp: [
+                {
+                  $toString: "$user._id",
+                },
+                loggedUserId,
+              ],
+            },
+          },
+        },
+      ]
+    : [
+        {
+          $sort: {
+            date: -1,
+          },
+        },
+        {
+          $addFields: {
+            userAuthorCompare: {
+              $strcasecmp: [
+                {
+                  $toString: "$user",
+                },
+                loggedUserId,
+              ],
+            },
+          },
+        },
+      ];
+  Message.aggregate(aggregationPipeline).exec((err, message_list) => {
+    if (err) {
+      return next(err);
+    }
+    const hydrated = message_list.map((message) => {
+      message.user = User.hydrate(message.user);
+      message = Message.hydrate(message);
+      return message;
     });
+    res.render("index", { message_list: hydrated });
+  });
 };
+
 exports.message_create_get = function (req, res, next) {
   if (!req.isAuthenticated()) {
     res.redirect("/club/login");
