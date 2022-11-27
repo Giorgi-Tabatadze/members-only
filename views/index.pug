@@ -14,7 +14,7 @@ block content
           p #{message.body}
           p Date Published: #{message.date ? `${message.dateFormatted}` : "Become member to view"}
         if (message.userAuthorCompare === 0 && activeUser.member)
-          a(href=`/club/${message._id}/edit/${message._id}`) Edit This message
+          a(href=`/club/${message._id}/edit/`) Edit This message
         if(activeUser && activeUser.admin)
             a(href=`/club/${message._id}/delete`) Delete This message
 
