@@ -266,7 +266,7 @@ exports.message_pin_post = [
           return next(messageNotFound);
         } else {
           console.log(messageToPin.pinnedDate.getDate());
-          if (messageToPin.pinnedDate.getDate() != 1) {
+          if (messageToPin.pinnedDate.getTime() != 0) {
             messageToPin.pinnedDate = 0;
           } else {
             messageToPin.pinnedDate = Date.now();
