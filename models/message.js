@@ -13,7 +13,7 @@ const MessageSchema = new Schema({
 });
 
 MessageSchema.virtual("dateFormatted").get(function () {
-  return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
+  return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATETIME_MED);
 });
 
 module.exports = mongoose.model("Message", MessageSchema);

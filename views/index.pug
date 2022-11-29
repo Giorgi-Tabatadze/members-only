@@ -1,6 +1,37 @@
 extends layout
 
 block content
+  // Modal
+  #exampleModal.modal.fade(tabindex='-1' aria-labelledby='exampleModalLabel' aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+        .modal-body
+          p Are you sure you want to delete this message?
+          
+        form(action="/club/delete" method="POST") 
+            input#message_delete_id.form-control(type='hidden',name='messageId', required='true')
+            .modal-footer
+
+              button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+              button.btn.btn-primary(type='submit') Yes
+
+  #pinModal.modal.fade(tabindex='-1' aria-labelledby='pinModal' aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+        .modal-body
+          p Are you sure you want to Pin this message to the top?
+          
+        form(action="/club/pin" method="POST") 
+            input#message_pin_id.form-control(type='hidden',name='messageId', required='true')
+            .modal-footer
+
+              button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+              button.btn.btn-primary(type='submit') Yes
+
   h1= "Welcome to message board"
   if (!message_list) 
     p Error fetching message
@@ -14,9 +45,26 @@ block content
           p #{message.body}
           p Date Published: #{message.date ? `${message.dateFormatted}` : "Become member to view"}
         if (message.userAuthorCompare === 0 && activeUser.member)
-          a(href=`/club/${message._id}/edit/`) Edit This message
+          a(href=`/club/${message._id}/edit/`)
+            button.btn.btn-primary(type='button') Edit
+
         if(activeUser && activeUser.admin)
-            a(href=`/club/${message._id}/delete`) Delete This message
+            button.btn.btn-primary(onclick=`provideIdForDelete("${message._id}")` type='button' data-bs-toggle='modal' data-bs-target='#exampleModal') Delete
+            if (message.pinnedDate.getTime() != 0)
+              button.btn.btn-primary(onclick=`provideIdForPin("${message._id}")` type='button' data-bs-toggle='modal' data-bs-target='#pinModal') Unpin
+            else 
+              button.btn.btn-primary(onclick=`provideIdForPin("${message._id}")` type='button' data-bs-toggle='modal' data-bs-target='#pinModal') Pin
+
+  script.
+        function provideIdForDelete(e) {
+              const myInput = document.getElementById('message_delete_id')
+              myInput.value= e 
+            }
+        function provideIdForPin(e) {
+              const myInput = document.getElementById('message_pin_id')
+              myInput.value= e 
+            }
+
 
 
 

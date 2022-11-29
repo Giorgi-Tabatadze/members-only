@@ -2,7 +2,7 @@ const Message = require("../models/message");
 const User = require("../models/user");
 const async = require("async");
 
-const { body, validationResult } = require("express-validator");
+const { body, param, validationResult } = require("express-validator");
 const message = require("../models/message");
 
 exports.message_board_get = function (req, res, next) {
@@ -20,6 +20,7 @@ exports.message_board_get = function (req, res, next) {
         },
         {
           $sort: {
+            pinnedDate: -1,
             date: -1,
           },
         },
@@ -114,45 +115,8 @@ exports.message_create_post = [
     }
   },
 ];
-exports.message_edit_get = function (req, res, next) {
-  if (!req.isAuthenticated()) {
-    res.redirect("/club/login");
-  }
-  if (!res.locals.activeUser.member) {
-    res.redirect("/club/become-member");
-  }
-  Message.findById(req.params.id).exec((err, messageToEdit) => {
-    if (err) {
-      return next(err);
-    }
-    if (messageToEdit === undefined) {
-      const messageNotFound = new Error(
-        "Message with provided id doesnt exist",
-      );
-      return next(messageNotFound);
-    }
-    if (messageToEdit.user.toString() !== req.session.passport.user) {
-      const perimissionError = new Error(
-        "You are not allowed to modify this message",
-      );
-      return next(perimissionError);
-    } else {
-      res.render("message_form", {
-        title: messageToEdit.title,
-        body: messageToEdit.body,
-      });
-    }
-  });
-};
-exports.message_edit_post = [
-  body("title", "Title must be between 1 and 100 characters")
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .escape(),
-  body("body", "Message must be between 1 and 300 characters")
-    .trim()
-    .isLength({ min: 1, max: 300 })
-    .escape(),
+exports.message_edit_get = [
+  param("id").escape(),
 
   function (req, res, next) {
     if (!req.isAuthenticated()) {
@@ -165,7 +129,50 @@ exports.message_edit_post = [
       if (err) {
         return next(err);
       }
-      if (messageToEdit === undefined) {
+      if (messageToEdit == undefined) {
+        const messageNotFound = new Error(
+          "Message with provided id doesnt exist",
+        );
+        return next(messageNotFound);
+      }
+      if (messageToEdit.user.toString() !== req.session.passport.user) {
+        const perimissionError = new Error(
+          "You are not allowed to modify this message",
+        );
+        return next(perimissionError);
+      } else {
+        res.render("message_form", {
+          title: messageToEdit.title,
+          body: messageToEdit.body,
+          messageId: messageToEdit._id,
+        });
+      }
+    });
+  },
+];
+exports.message_edit_post = [
+  body("title", "Title must be between 1 and 100 characters")
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .escape(),
+  body("body", "Message must be between 1 and 300 characters")
+    .trim()
+    .isLength({ min: 1, max: 300 })
+    .escape(),
+  body("messageId").trim().escape(),
+
+  function (req, res, next) {
+    if (!req.isAuthenticated()) {
+      res.redirect("/club/login");
+    }
+    if (!res.locals.activeUser.member) {
+      res.redirect("/club/become-member");
+    }
+    Message.findById(req.body.messageId).exec((err, messageToEdit) => {
+      if (err) {
+        return next(err);
+      }
+      if (messageToEdit == undefined) {
         const messageNotFound = new Error(
           "Message with provided id doesnt exist",
         );
@@ -184,6 +191,7 @@ exports.message_edit_post = [
             errors: errors.array(),
             title: req.body.title,
             body: req.body.body,
+            messageId: req.body.messageId,
           });
         } else {
           const updatedMessage = new Message({
@@ -194,7 +202,76 @@ exports.message_edit_post = [
             pinnedDate: messageToEdit.pinnedDate,
             _id: messageToEdit._id,
           });
-          Message.findByIdAndUpdate(req.params.id, updatedMessage, (err) => {
+          Message.findByIdAndUpdate(
+            req.body.messageId,
+            updatedMessage,
+            (err) => {
+              if (err) {
+                return next(err);
+              } else {
+                res.redirect("/club");
+              }
+            },
+          );
+        }
+      }
+    });
+  },
+];
+exports.message_remove_post = [
+  body("messageId").trim().escape(),
+
+  function (req, res, next) {
+    if (!req.isAuthenticated()) {
+      res.redirect("/club/login");
+    }
+    if (!res.locals.activeUser.admin) {
+      res.redirect("/club/become-member");
+    } else {
+      Message.findByIdAndRemove(req.body.messageId, (err, messageToDelete) => {
+        if (err) {
+          return next(err);
+        }
+        if (messageToDelete == undefined) {
+          const messageNotFound = new Error(
+            "Message with provided id doesnt exist",
+          );
+          return next(messageNotFound);
+        } else {
+          res.redirect("/club");
+        }
+      });
+    }
+  },
+];
+exports.message_pin_post = [
+  body("messageId").trim().escape(),
+
+  function (req, res, next) {
+    if (!req.isAuthenticated()) {
+      res.redirect("/club/login");
+    }
+    if (!res.locals.activeUser.admin) {
+      res.redirect("/club/become-member");
+    } else {
+      Message.findById(req.body.messageId).exec((err, messageToPin) => {
+        if (err) {
+          return next(err);
+        }
+        console.log(messageToPin);
+        if (messageToPin == undefined) {
+          const messageNotFound = new Error(
+            "Message with provided id doesnt exist",
+          );
+          return next(messageNotFound);
+        } else {
+          console.log(messageToPin.pinnedDate.getDate());
+          if (messageToPin.pinnedDate.getDate() != 1) {
+            messageToPin.pinnedDate = 0;
+          } else {
+            messageToPin.pinnedDate = Date.now();
+          }
+          messageToPin.save((err) => {
             if (err) {
               return next(err);
             } else {
@@ -202,13 +279,7 @@ exports.message_edit_post = [
             }
           });
         }
-      }
-    });
+      });
+    }
   },
 ];
-exports.message_remove_delete = function (req, res, next) {
-  res.send("not implemented yet");
-};
-exports.message_pin_put = function (req, res, next) {
-  res.send("not implemented yet");
-};

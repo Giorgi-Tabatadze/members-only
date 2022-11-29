@@ -8,6 +8,7 @@ block content
         .mb-3
             label(for="body") Message: 
             textarea#body.form-control(name="body", cols="30", rows="10" required maxlength="300") #{body === undefined ? "" : body}
+        input#message_id.form-control(type='hidden',name='messageId', required='true', value=(messageId === undefined? "" : messageId) )
 
         button.btn.btn-primary(type='submit') Submit
 

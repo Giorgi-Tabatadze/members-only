@@ -14,6 +14,8 @@ router.get("/create-message", message_controller.message_create_get);
 router.post("/create-message", message_controller.message_create_post);
 router.get("/:id/edit", message_controller.message_edit_get);
 router.post("/:id/edit", message_controller.message_edit_post);
+router.post("/delete", message_controller.message_remove_post);
+router.post("/pin", message_controller.message_pin_post);
 
 //  USER ROUTES
 
